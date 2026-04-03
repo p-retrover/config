@@ -35,7 +35,7 @@ echo [ok] Buckets ready.
 
 :: --- CORE INSTALLS ---
 echo [*] Installing git and 7zip...
-scoop install git 7zip
+scoop install git 7zip scoop-import
 
 :: Prompt for optional install
 set /p choice="Do you want to install Neovim? (y/n): "
