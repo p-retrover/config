@@ -25,9 +25,22 @@ Claude Code utilizes a **layered loading model**, meaning multiple `CLAUDE.md` f
 
 **What to Include (and How to Write It)**
 
+*   **Keep it Lean:** The official Anthropic recommendation is to keep the file under 200 lines, with 300 as the absolute maximum, or optimally under 60 lines. If rules are too long, Claude will selectively ignore them.
 * **Target Specific Failures:** Generic rules ("be concise", "pay attention to code quality") are far less effective than targeting actual failure modes. For example, if Claude fails on pipelines, write: "when a step fails, stop immediately and report the full error with traceback before attempting any fix".
 * **Communicate Intent**: Explain *why* rules exist. Instead of just "do not modify `src/generated/`", state that they are auto-generated from an OpenAPI schema, pointing the AI to the true source of truth.
 * **High-Impact Fixes to Include:** Enforce that Claude must read files before writing, run tests before declaring a task "done", read unchanged files only once, and prefer targeted edits over large file rewrites.
+
+**Aggressive Context Management & Focus**
+Claude's context window is the most important resource to manage; it fills up with every message, file read, and command output, leading to degraded performance and "forgetting". 
+*   **The `/btw` Command for Focus:** When you interrupt Claude mid-task with a side request, it pollutes the context history. Prefix side-requests with `/btw`. The answer appears in a dismissible overlay and never enters the conversation history, keeping your main task perfectly intact and token-efficient.
+*   **Use Subagents for Investigation:** If you have a larger side-quest, say "use subagents to investigate". Claude will spawn a separate context window to explore the codebase in parallel and simply report back a summary, keeping the main thread clean.
+*   **Manually Compact at 50%:** Claude enters an "agent dumb zone" around 60-70% context usage. Do not wait for auto-compaction; manually execute `/compact` at 50% usage to preserve performance.
+*   **Rollback When Off Track:** If Claude goes off track, do not try to correct it in the same chat, as the erroneous reasoning remains in context. Press `Esc Esc` (or use `/rewind`) to rollback to the previous checkpoint and try a different angle. Run `/clear` frequently between unrelated tasks.
+
+**Quality Control, Verification & Self-Correction**
+*   **The "Glitch" Prompt for Self-Correction:** *(External Tip)* If Claude gives an answer you aren't 100% sure about, paste this exact prompt to force a self-audit: *"pause - i think there may be a glitch. review your previous answer for: mistakes, missing steps, unsupported assumptions and invented details. then rewrite the answer more carefully and give a confidence rating from 1–10."* Use the resulting confidence rating to determine if you need to manually verify the code.
+*   **Demand a Rewrite for Mediocre Solutions:** When Claude provides a solution that works but is messy, don't patch it up. Tell Claude: *"knowing everything you know now, scrap this and implement the elegant solution"*. The rewritten version is consistently better because it leverages the complete understanding of the problem.
+*   **The Trust-Then-Verify Gap:** Never accept code without validation. Always provide verification methods (tests, scripts, screenshots) so Claude can check its own work. If you can't verify it, don't ship it.
 
 **Continuous Evolution & Workflow Profiles**
 
