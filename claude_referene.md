@@ -56,16 +56,19 @@ Here is the updated list of references, drawing from both the official guides an
 * *Understanding CLAUDE.md Loading in Large Monorepos*
 * *Manage Claude's memory*
 * *AGENTS.md*
-*   [TurboDocx: CLAUDE.md Best Practices](https://www.turbodocx.com/blog/how-to-write-claude-md-best-practices)
-*   [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice)
-*   [GitHub Gist: AGENTS.md Guidelines](https://gist.github.com/jerdaw/3917eab775d3e4bbcf37928101fbc3db)
-*   [egghead.io: CLAUDE.md Initialization and Best Practices in Claude Code](https://egghead.io/claude-md-initialization-and-best-practices-in-claude-code~jae0x)
+* [TurboDocx: CLAUDE.md Best Practices](https://www.turbodocx.com/blog/how-to-write-claude-md-best-practices)
+* [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice)
+* [GitHub Gist: AGENTS.md Guidelines](https://gist.github.com/jerdaw/3917eab775d3e4bbcf37928101fbc3db)
+* [egghead.io: CLAUDE.md Initialization and Best Practices in Claude Code](https://egghead.io/claude-md-initialization-and-best-practices-in-claude-code~jae0x)
+* [claude code is great](https://leo-godin.medium.com/claude-code-is-great-6db35d8685f0#bypass)
 * *Anthropic Docs - Reduce Hallucinations*
 * *PromptHub - "Three Prompt Engineering Methods to Reduce Hallucinations"*
 * *DEV Community - "7 Ways to Cut Your Claude Code Token Usage"*
 * *Medium - "Stop Wasting Tokens: Optimize Claude Code Context by 60%"*
+
 ### Official Claude Code Documentation
-*   [Best Practices](https://code.claude.com/docs/en/best-practices)
-*   [How Claude Code works](https://code.claude.com/docs/en/how-claude-code-works)
-*   [Common workflows](https://code.claude.com/docs/en/common-workflows)
-*   [Extend Claude Code (Skills, Hooks, MCP, etc.)](https://code.claude.com/docs/en/features-overview)
+
+* [Best Practices](https://code.claude.com/docs/en/best-practices)
+* [How Claude Code works](https://code.claude.com/docs/en/how-claude-code-works)
+* [Common workflows](https://code.claude.com/docs/en/common-workflows)
+* [Extend Claude Code (Skills, Hooks, MCP, etc.)](https://code.claude.com/docs/en/features-overview)
