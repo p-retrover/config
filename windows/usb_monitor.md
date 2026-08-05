@@ -1,44 +1,65 @@
 # USB Opened File Auto-Copier (Windows Native)
 
-A lightweight, native Windows solution to automatically detect and copy files from a target USB drive the moment they are opened by any application.
+A native Windows background monitoring setup that silently logs and copies files opened from a target USB drive (`D:`, `E:`, `F:`, etc.) to a local destination directory using relative paths.
 
 ---
 
-## 1. Architecture Overview
+## Directory Layout
 
-* **Detection Mechanism:** Windows WMI Event Watcher (`Win32_Process` creation).
-* **Target Isolation:** Uses regex targeting files strictly on drive `F:\` (`F:\...`).
-* **Execution Mode:** Runs invisibly in the background via a VBScript wrapper.
-* **Destination Path:** `C:\CopiedFiles`
+Put these scripts together in the same directory:
+
+```text
+C:\Scripts\ (or any folder)
+├── run_monitor.bat    # Detached background launcher (Run as Admin)
+├── usb_monitor.ps1    # Core PowerShell WMI monitoring logic
+├── usb_monitor.log    # Automatically generated execution log
+└── CopiedFiles\       # Automatically generated destination folder
+
+```
 
 ---
 
-## 2. File 1: `usb_monitor.ps1`
+## 1. `run_monitor.bat` (Silent Detached Launcher)
 
-Save the following code as `C:\Scripts\usb_monitor.ps1`:
+This batch script launches PowerShell invisibly, detaches the process so the terminal window closes immediately, and redirects all output streams to `usb_monitor.log`.
+
+```bat
+@echo off
+start "" powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -NoProfile -Command "& '%~dp0usb_monitor.ps1' *> '%~dp0usb_monitor.log'"
+
+```
+
+---
+
+## 2. `usb_monitor.ps1` (Core Listener)
+
+Monitors `Win32_Process` events via WMI, isolates file launches matching target USB drive letters, and copies opened files to the relative `CopiedFiles` folder.
 
 ```powershell
 # --- CONFIGURATION ---
-$usbLetter = "F:"                     # Target USB drive letter
-$destinationFolder = "C:\CopiedFiles"  # Destination directory
+# Target drive letters to monitor
+$targetDrives = @("D:", "E:", "F:", "G:", "H:", "I:", "J:")
+
+$destinationFolder = Join-Path -Path $PSScriptRoot -ChildPath "CopiedFiles"  # Destination directory
 
 # Create destination folder if missing
 if (-not (Test-Path $destinationFolder)) {
     New-Item -ItemType Directory -Path $destinationFolder | Out-Null
 }
 
+# Construct an OR regex pattern: (D:|E:|F:|G:|H:|I:|J:)
+$escapedDrives = $targetDrives | ForEach-Object { [regex]::Escape($_) }
+$driveRegex = "(" + ($escapedDrives -join "|") + ")"
+$pattern = "$driveRegex\\[^`"]+\.[a-zA-Z0-9]+"
+
 Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host " Active Monitoring on Drive $usbLetter" -ForegroundColor Cyan
+Write-Host " Active Monitoring on Drives: $($targetDrives -join ', ')" -ForegroundColor Cyan
 Write-Host " Saving copies to: $destinationFolder" -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Cyan
 
-# Create WMI Event Watcher for new processes
+# Create WMI Event Watcher for process creation
 $query = "SELECT * FROM __InstanceCreationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_Process'"
 $watcher = New-Object System.Management.ManagementEventWatcher($query)
-
-# Target ONLY paths that start with the USB drive letter (e.g., F:\...)
-$escapedLetter = [regex]::Escape($usbLetter)
-$pattern = "$escapedLetter\\[^`"]+\.[a-zA-Z0-9]+"
 
 try {
     while ($true) {
@@ -59,46 +80,43 @@ try {
     }
 }
 finally {
-    $watcher.Stop()$watcher.Dispose()
+    # Clean up event listener when stopped
+    $watcher.Stop()
+    $watcher.Dispose()
 }
 
 ```
 
 ---
 
-## 3. File 2: `run_usb_monitor.vbs` (Silent Launcher)
+## 3. Usage & Operations
 
-Save the following code as `C:\Scripts\run_usb_monitor.vbs` to execute the PowerShell script silently without opening a terminal window:
+### Start the Background Monitor
 
-```vbscript
-Set WshShell = CreateObject("WScript.Shell")
-WshShell.Run "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File ""C:\Scripts\usb_monitor.ps1""", 0, False
+Right-click `run_monitor.bat` $\rightarrow$ **Run as Administrator**. The terminal will pop up briefly and close automatically.
+
+### Monitor Output in Real Time
+
+Open a standard PowerShell terminal in the script directory and run:
+
+```powershell
+Get-Content -Path ".\usb_monitor.log" -Wait -Tail 20
 
 ```
 
----
-
-## 4. Usage & Execution
-
-### Start the Background Process
-
-Double-click `run_usb_monitor.vbs`. The script will immediately begin monitoring drive `F:` in the background.
-
 ### Stop the Background Process
 
-Run this command in PowerShell to locate and terminate the background instance:
+To kill the background monitoring script without opening Task Manager:
 
 ```powershell
 Get-CimInstance Win32_Process -Filter "Name = 'powershell.exe'" | Where-Object { $_.CommandLine -like "*usb_monitor.ps1*" } | Invoke-CimMethod -MethodName Terminate
 
 ```
 
-Alternatively, open **Task Manager** (`Ctrl + Shift + Esc`) and terminate the relevant `powershell.exe` background process.
-
 ---
 
-## 5. Notes & Technical Limitations
+## 4. Technical Notes & Limitations
 
-1. **Win32 Applications:** Works with native desktop software (e.g., MS Paint, Notepad, Acrobat Reader, MS Office, Photoshop, VLC).
-2. **UWP Apps:** Universal Windows Platform apps (like the default Windows Photos app) route launches through `ApplicationFrameHost.exe` without passing command-line arguments. To capture images, set the default image viewer to a traditional app (e.g., Paint).
-3. **Trigger Event:** Triggers on application launch containing the target file path. Opening files within an already open application via `File > Open` is not captured by process creation monitoring.
+* **Execution Context:** Requires Administrator privileges to listen to WMI process events.
+* **Compatibility:** Works with standard Win32 applications (MS Office, Acrobat, Paint, Notepad, media players, etc.).
+* **UWP Apps:** Windows Photos and other UWP apps route launches via `ApplicationFrameHost.exe`. Change the default viewer for image files to Paint or a classic photo viewer if image tracking is needed.
