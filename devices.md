@@ -23,11 +23,22 @@
 ![](./arch/screenshots/screen1.png)
 ![](./arch/screenshots/screen2.png)
 
-## Android
+## samsung S23
 
 ![status](https://img.shields.io/badge/status-stable-brightgreen)
 
-![](./android/screenshots/fastfetch.jpg)
-![](./android/screenshots/lock-screen.jpg)
-![](./android/screenshots/screen-1.jpg)
-![](./android/screenshots/screen-2.jpg)
+![](./samsungS23/screenshots/fastfetch.jpg)
+![](./samsungS23/screenshots/lock-screen.jpg)
+![](./samsungS23/screenshots/screen1.jpg)
+![](./samsungS23/screenshots/screen2.jpg)
+
+
+## redmi 9A
+
+![status](https://img.shields.io/badge/status-experimental-red)
+
+![](./redmi9A/screenshots/fastfetch.png)
+![](./redmi9A/screenshots/drop-down.png)
+![](./redmi9A/screenshots/lock-screen.png)
+![](./redmi9A/screenshots/home-screen.png)
+![](./redmi9A/screenshots/app-drawer.png)
